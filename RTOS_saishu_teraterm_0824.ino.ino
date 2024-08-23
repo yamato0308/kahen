@@ -139,7 +139,7 @@ void Taskprog(void *pvParameters) {
           vol_val += current_mA;
         }
         vol_val2 = vol_val / 10;
-        v = analogRead(A0);
+        v = analogRead(A0) * (5.0 / 1023.0);
 
         Serial.print(currentTime / 1000.0);
         Serial.print("  ");
