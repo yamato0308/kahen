@@ -17,8 +17,8 @@ DallasTemperature sensors(&oneWire);  //                                        
 const int pwmPin = 9;     // PWM出力に使うピン番号
 const int buttonPin = 4;  // デジタル3番ピンを指定 (ボタンピン)
 
-unsigned long totalTime = 7800;  // <===================================================================== timeモードの時、この数値を変えて合計時間（ミリ秒）を設定(初期値10秒)
-float beta = 7.0;
+unsigned long totalTime = 10000;  // <===================================================================== timeモードの時、この数値を変えて合計時間（ミリ秒）を設定(初期値10秒)
+float beta = 5.0;
 const int pwmStartValue = 110;  //電流が流れ始めるpwm値
 const int pwmEndValue = 240;    //電流が流れがとまるpwm値
 unsigned long startTime;
@@ -38,6 +38,7 @@ int vol_val;
 
 float TempA;  //温度
 
+int PCpwmValue;
 
 
 void setup() {
@@ -60,6 +61,7 @@ void setup() {
 void TaskJIKAN(void *pvParameters) {
   (void)pvParameters;
   vTaskDelay(2000 / portTICK_PERIOD_MS);
+
   startTime = millis();
   for (;;) {
     if (digitalRead(buttonPin) == 1) {
@@ -70,7 +72,7 @@ void TaskJIKAN(void *pvParameters) {
     currentMillis = millis() - startTime;  // ミリ秒単位で経過時間を取得
                                            //  Serial.println(currentMillis);
     if (currentMillis < totalTime + d) {
-      integerPart = (currentMillis ) / 1000;       // 整数部の秒
+      integerPart = (currentMillis) / 1000;           // 整数部の秒
       fractionalPart = (currentMillis % 1000) / 100;  // 小数部の1桁（ミリ秒を100で割る）
       lcd.setCursor(0, 0);
       lcd.print(integerPart);
@@ -78,7 +80,8 @@ void TaskJIKAN(void *pvParameters) {
       lcd.print(fractionalPart);  // 小数部を1桁表示
       m = (float)totalTime / 1000;
       lcd.setCursor(8, 0);
-      lcd.print(m, 2);
+      lcd.print(m, 1);
+      lcd.print("    ");
     }
     if (currentMillis >= totalTime + d) {
       if (!hasfull) {
@@ -87,7 +90,6 @@ void TaskJIKAN(void *pvParameters) {
         hasfull = true;  // 処理が終わったらフラグをtrueにする
       }
     }
-
     sensors.requestTemperatures();             // 温度取得要求
     TempA = sensors.getTempCByIndex(0) + 3.3;  //温度センサ1を値(0)に (黄)
     vTaskDelay(50 / portTICK_PERIOD_MS);       // 10msのディレイを追加
@@ -145,6 +147,7 @@ void Taskprog(void *pvParameters) {
     vTaskDelay(100 / portTICK_PERIOD_MS);  // 10msのディレイを追加
   }
 }
+
 
 void loop() {
 }
